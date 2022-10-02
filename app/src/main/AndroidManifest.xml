@@ -12,10 +12,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".ChangeImageProfile"
-            android:label="ChangeProfile"
-            android:parentActivityName=".RegisterActivity"/>
-        <activity
             android:name=".ProfileActivity"
             android:label="Profile"
             android:parentActivityName=".RegisterActivity" />

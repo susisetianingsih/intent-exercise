@@ -5,8 +5,11 @@ package id.ac.polinema.intentexercise;
 
         import android.content.Intent;
         import android.graphics.Bitmap;
+        import android.graphics.drawable.BitmapDrawable;
+        import android.graphics.drawable.Drawable;
         import android.net.Uri;
         import android.os.Bundle;
+        import android.os.Parcelable;
         import android.provider.MediaStore;
         import android.util.Log;
         import android.view.View;
@@ -14,8 +17,10 @@ package id.ac.polinema.intentexercise;
         import android.widget.ImageView;
         import android.widget.Toast;
 
+        import com.google.android.gms.cast.framework.media.ImagePicker;
         import com.google.android.material.textfield.TextInputEditText;
 
+        import java.io.ByteArrayInputStream;
         import java.io.IOException;
 
         import de.hdodenhof.circleimageview.CircleImageView;
@@ -30,10 +35,12 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputEditText text_homepage;
     private TextInputEditText text_about;
     private Button btn_ok;
-    private CircleImageView avatar;
+    private CircleImageView avatar, change_Avatar;
     private static final int GALLERY_REQUEST_CODE = 1;
-    private static final String TAG = ChangeImageProfile.class.getCanonicalName();
+    private static final String TAG = RegisterActivity.class.getCanonicalName();
     private Bitmap bitmap;
+    private Uri imgUri = null;
+    private boolean change_img = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,16 +56,7 @@ public class RegisterActivity extends AppCompatActivity {
         btn_ok = findViewById(R.id.button_ok);
         avatar = findViewById(R.id.image_profile);
 
-//        avatar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent pindah = new Intent(RegisterActivity.this, ChangeImageProfile.class);
-//                pindah.putExtra("image", R.drawable.profile_picture);
-//                startActivity(pindah);
-//            }
-//        });
-
-        avatar.setOnClickListener(new View.OnClickListener() {
+        photo_profil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivityForResult(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI), GALLERY_REQUEST_CODE);
@@ -76,29 +74,31 @@ public class RegisterActivity extends AppCompatActivity {
                 String homepage = text_homepage.getText().toString();
                 String about = text_about.getText().toString();
 
-
-                pindah.putExtra("fullname", fullname);
-                pindah.putExtra("email", email);
-                pindah.putExtra("password", password);
-                pindah.putExtra("con_password", con_password);
-                pindah.putExtra("homepage", homepage);
-                pindah.putExtra("about", about);
-
-                if (fullname.isEmpty()){
-                    text_fullname.setError("Fullname diperlukan");
+                if (!change_img){
+                    Toast.makeText(RegisterActivity.this, "Image must be change", Toast.LENGTH_SHORT).show();
+                } else if (fullname.isEmpty()){
+                    text_fullname.setError("Fullname required");
                 } else if (email.isEmpty()) {
-                    text_email.setError("Email diperlukan");
+                    text_email.setError("Email required");
                 } else if (password.isEmpty()) {
-                    text_password.setError("Password diperlukan");
+                    text_password.setError("Password required");
                 } else if (con_password.isEmpty()) {
-                    text_confirm_password.setError("Confirm Password diperlukan");
+                    text_confirm_password.setError("Confirm Password required");
                 } else if (homepage.isEmpty()) {
-                    text_homepage.setError("Homepage diperlukan");
+                    text_homepage.setError("Homepage required");
                 } else if (about.isEmpty()) {
-                    text_about.setError("About diperlukan");
+                    text_about.setError("About required");
                 } else if (!password.equals(con_password)) {
                     Toast.makeText(RegisterActivity.this, "Confirm password is not correct", Toast.LENGTH_SHORT).show();
                 } else {
+                    String image = imgUri.toString();
+                    pindah.putExtra("image", image);
+                    pindah.putExtra("fullname", fullname);
+                    pindah.putExtra("email", email);
+                    pindah.putExtra("password", password);
+                    pindah.putExtra("con_password", con_password);
+                    pindah.putExtra("homepage", homepage);
+                    pindah.putExtra("about", about);
                     startActivity(pindah);
                 }
             }
@@ -106,21 +106,24 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    private void onActivityForResult(int requestCode, int resultCode, @Nullable Intent data) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_CANCELED){
             Toast.makeText(this, "Cancel input image", Toast.LENGTH_SHORT).show();
             return;
-        } else if (requestCode == GALLERY_REQUEST_CODE){
-            if (data != null){
-                try {
-                    Uri imgUri = data.getData();
-                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imgUri);
-                    avatar.setImageBitmap(bitmap);
-//                    profile.setImageURI(imgUri);
-                } catch (IOException e) {
-                    Toast.makeText(this, "Can't load image", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, e.getMessage());
+        } else {
+            if (requestCode == GALLERY_REQUEST_CODE){
+                if (data != null){
+                    try {
+                        change_img = true;
+                        imgUri = data.getData();
+                        bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imgUri);
+                        avatar.setImageBitmap(bitmap);
+                    } catch (IOException e) {
+                        Toast.makeText(this, "Can't load image", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, e.getMessage());
+                    }
                 }
             }
         }
