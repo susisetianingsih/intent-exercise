@@ -10,6 +10,7 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
 
 	private Button btn_rgs;
+	private Button ujicoba;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
